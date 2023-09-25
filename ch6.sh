@@ -64,14 +64,61 @@ lire_date () {
 	done
 }
 
+reecriture_salarie() {
+	IFS=';'
+	ligne=$(grep -i "$nom;$prenom" fichier_salaries);
+	set $ligne;
+	nom=$1; prenom=$2; datenais=$3; sf=$4; nsoc=$5; adr=$6; nport=$7; nfixe=$8;
+	while $(true);
+	do
+		echo -e "Données actuelles du salarié: \n" \
+			"(1)\tNom: $nom\n" \
+			"(2)\tPrénom: $prenom\n" \
+			"(3)\tDate de naissance: $datenais\n" \
+			"(4)\tSituation familiale: $sf\n" \
+			"(5)\tNuméro de sécurité sociale: $nsoc\n" \
+			"(6)\tAdresse: $adr\n" \
+			"(7)\tNuméro de téléphone portable: $nport\n" \
+			"(8)\tNuméro de téléphone fixe: $nfixe\n\n" \
+			"(9)\tSauvegarder et quitter\n" \
+			"(10)\tQuitter sans sauvegarder\n";
+
+		read -p "Votre chiffre : " chiffre;
+		if [[ $chiffre =~ ^([0-9]|10)$ ]];
+		then
+			case $chiffre in
+				(1) read -p "Nouveau nom : " nom;;
+				(2) read -p "Nouveau prénom : " prenom;;
+				(3) read -p "Nouvelle date de naissance : " datenais;;
+				(4) read -p "Nouvelle situation familiale : " sf;;
+				(5) read -p "Nouveau numéro de sécurité sociale : " nsoc;;
+				(6) read -p "Nouvelle adresse : " adr;;
+				(7) read -p "Nouveau numéro de téléphone portable : " nport;;
+				(8) read -p "Nouveau numéro de téléphone fixe : " nfixe;;
+				(9) echo "$nom;$prenom;$datenais;$sf;$nsoc;$adr;$nport;$nfixe" >> tmp_salaries && sort tmp_salaries > fichier_salaries && rm tmp_salaries && break;;
+				(10) break;;
+			esac
+		else
+			echo "Saisie incorrecte."
+		fi
+	done
+}
+
 modifier_salarie() {
 	echo "Saisissez le nom et le prénom du salarié à modifier";
-	read -p "(Nom Prénom)" nom_complet;
+	read -p "(Nom Prénom) " nom_complet;
+	IFS=" "
 	set $nom_complet;
 	nom=$1; 
 	prenom=$2;
+	echo "$nom;$prenom;";
 	nb_doublons=$(grep -i "$nom;$prenom;" fichier_salaries | wc -l);
 	echo $nb_doublons;
+	if [ $nb_doublons -eq 1 ];
+	then
+		grep -vi "$nom;$prenom;" fichier_salaries > tmp_salaries
+		reecriture_salarie
+	fi
 }
 
 while true;
